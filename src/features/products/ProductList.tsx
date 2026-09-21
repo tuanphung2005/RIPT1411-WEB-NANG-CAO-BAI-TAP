@@ -5,9 +5,13 @@ import { ProductCard } from './ProductCard';
 
 interface ProductListProps {
   onProductAdded?: (title: string) => void;
+  onFavoriteToggle?: (title: string, isFav: boolean) => void;
 }
 
-export const ProductList: React.FC<ProductListProps> = ({ onProductAdded }) => {
+export const ProductList: React.FC<ProductListProps> = ({
+  onProductAdded,
+  onFavoriteToggle,
+}) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('Tất cả');
 
@@ -165,6 +169,7 @@ export const ProductList: React.FC<ProductListProps> = ({ onProductAdded }) => {
                   key={product.id}
                   product={product}
                   onAdded={onProductAdded}
+                  onFavoriteToggle={onFavoriteToggle}
                 />
               ))}
             </div>

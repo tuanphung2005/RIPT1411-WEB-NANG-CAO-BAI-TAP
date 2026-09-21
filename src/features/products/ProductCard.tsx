@@ -1,17 +1,28 @@
 import React from 'react';
-import { ShoppingBag, Star, Check } from 'lucide-react';
+import { ShoppingBag, Star, Check, Heart } from 'lucide-react';
 import type { Product } from './types';
 import { useAppDispatch, useAppSelector } from '../../app/hooks';
 import { addToCart, selectCartItemById } from '../cart/cartSlice';
+import { useFavoritesStore } from '../favorites/favoritesStore';
 
 interface ProductCardProps {
   product: Product;
   onAdded?: (productTitle: string) => void;
+  onFavoriteToggle?: (productTitle: string, isFav: boolean) => void;
 }
 
-export const ProductCard: React.FC<ProductCardProps> = ({ product, onAdded }) => {
+export const ProductCard: React.FC<ProductCardProps> = ({
+  product,
+  onAdded,
+  onFavoriteToggle,
+}) => {
   const dispatch = useAppDispatch();
   const cartItem = useAppSelector((state) => selectCartItemById(state, product.id));
+
+  const isFav = useFavoritesStore((state) =>
+    state.favorites.some((item) => item.id === product.id)
+  );
+  const toggleFavorite = useFavoritesStore((state) => state.toggleFavorite);
 
   const currentInCart = cartItem?.quantity ?? 0;
   const isOutOfStock = product.stock <= 0;
@@ -22,6 +33,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAdded }) =>
     dispatch(addToCart(product));
     if (onAdded) {
       onAdded(product.title);
+    }
+  };
+
+  const handleToggleFavorite = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleFavorite(product);
+    if (onFavoriteToggle) {
+      onFavoriteToggle(product.title, !isFav);
     }
   };
 
@@ -39,6 +59,20 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, onAdded }) =>
           className="product-image"
           loading="lazy"
         />
+        <button
+          type="button"
+          className={`btn-favorite-card ${isFav ? 'is-favorited' : ''}`}
+          onClick={handleToggleFavorite}
+          title={isFav ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích'}
+          aria-label={isFav ? 'Bỏ khỏi yêu thích' : 'Thêm vào yêu thích'}
+        >
+          <Heart
+            size={18}
+            className="heart-icon"
+            fill={isFav ? '#ef4444' : 'none'}
+            stroke={isFav ? '#ef4444' : 'currentColor'}
+          />
+        </button>
       </div>
 
       <div className="product-info">
